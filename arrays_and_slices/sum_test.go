@@ -40,3 +40,23 @@ func TestSumAllTails(t *testing.T) {
 		checkSums(t, got, want)
 	})
 }
+
+func TestAppendByte(t *testing.T) {
+	t.Run("for slice with fixed length", func(t *testing.T) {
+		got := AppendByte([]byte{'a', 'b', 'c', 'd'}, 'e', 'f', 'g')
+		want := []byte{'a', 'b', 'c', 'd', 'e', 'f', 'g'}
+
+		if !slices.Equal(got, want) {
+			t.Errorf("got %v want %v", got, want)
+		}
+	})
+
+	t.Run("for empty slice", func(t *testing.T) {
+		got := AppendByte([]byte{}, 'a', 'b')
+		want := []byte{'a', 'b'}
+
+		if !slices.Equal(got, want) {
+			t.Errorf("got %v want %v", got, want)
+		}
+	})
+}
