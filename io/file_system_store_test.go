@@ -1,25 +1,25 @@
 package main
 
 import (
-	"io"
 	"os"
 	"testing"
 )
 
 func TestFileSystemStore(t *testing.T) {
-	t.Run("league from a reader", func(t *testing.T) {
+	t.Run("league sorted", func(t *testing.T) {
 		database, cleanDatabase := createTempFile(t, `[
 			{"Name": "Aman", "Wins": 10},
 			{"Name": "Sujal", "Wins": 32}
 		]`)
 
 		defer cleanDatabase()
-		store := FileSystemPlayerStore{database}
+		store, err := NewFileSystemPlayerStore(database)
+		assertNoError(t, err)
 		got := store.GetLeague()
 
 		want := []Player{
-			{"Aman", 10},
 			{"Sujal", 32},
+			{"Aman", 10},
 		}
 
 		assertLeague(t, got, want)
@@ -36,7 +36,8 @@ func TestFileSystemStore(t *testing.T) {
 
 		defer cleanDatabase()
 
-		store := FileSystemPlayerStore{database}
+		store, err := NewFileSystemPlayerStore(database)
+		assertNoError(t, err)
 
 		got := store.GetPlayerScore("Aman")
 		want := 10
@@ -52,7 +53,8 @@ func TestFileSystemStore(t *testing.T) {
 
 		defer cleanDatabase()
 
-		store := FileSystemPlayerStore{database}
+		store, err := NewFileSystemPlayerStore(database)
+		assertNoError(t, err)
 
 		store.RecordWin("Sujal")
 
@@ -69,7 +71,8 @@ func TestFileSystemStore(t *testing.T) {
 
 		defer cleanDatabase()
 
-		store := FileSystemPlayerStore{database}
+		store, err := NewFileSystemPlayerStore(database)
+		assertNoError(t, err)
 		store.RecordWin("Nitesh")
 
 		got := store.GetPlayerScore("Nitesh")
@@ -77,9 +80,18 @@ func TestFileSystemStore(t *testing.T) {
 
 		assertScoreEquals(t, got, want)
 	})
+
+	t.Run("works with empty file", func(t *testing.T) {
+		database, cleanDatabase := createTempFile(t, "")
+		defer cleanDatabase()
+
+		_, err := NewFileSystemPlayerStore(database)
+
+		assertNoError(t, err)
+	})
 }
 
-func createTempFile(t testing.TB, initialdata string) (io.ReadWriteSeeker, func()) {
+func createTempFile(t testing.TB, initialdata string) (*os.File, func()) {
 	t.Helper()
 
 	tmpFile, err := os.CreateTemp("", "db")
@@ -102,5 +114,13 @@ func assertScoreEquals(t testing.TB, got, want int) {
 
 	if got != want {
 		t.Errorf("got %d, want %d", got, want)
+	}
+}
+
+func assertNoError(t testing.TB, err error) {
+	t.Helper()
+
+	if err != nil {
+		t.Fatalf("didn't expect an error but got one %v", err)
 	}
 }
