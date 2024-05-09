@@ -31,10 +31,10 @@ func TestStacks(t *testing.T) {
 		myStackOfInts.Push(1)
 		myStackOfInts.Push(2)
 
-		firstNum, _ := myStackOfInts.Pop()
-		secondNum, _ := myStackOfInts.Pop()
+		firstInt, _ := myStackOfInts.Pop()
+		secondInt, _ := myStackOfInts.Pop()
 
-		AssertEqual(t, firstNum+secondNum, 3)
+		AssertEqual(t, firstInt+secondInt, 3)
 	})
 }
 
